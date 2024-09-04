@@ -24,6 +24,7 @@ public class Facility {
     @Column(unique = true)
     private String name;
 
+    private String description;
     private int slotduration;
     private LocalTime starttime;
     private LocalTime endtime;

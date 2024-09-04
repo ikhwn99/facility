@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
 import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -30,11 +29,12 @@ public class BookingService {
     private TimeslotRepository timeslotRepository;
 
 
-    public Facility generateFacility(String name,int slotduration,LocalTime start,LocalTime end){
+    public Facility generateFacility(String name, String description, int slotduration, LocalTime start, LocalTime end){
 
         Facility newfacility = new Facility();
 
         newfacility.setName(name);
+        newfacility.setDescription(description);
         newfacility.setStarttime(start);
         newfacility.setEndtime(end);
         newfacility.setSlotduration(slotduration);
@@ -47,14 +47,15 @@ public class BookingService {
         return newfacility;
     }
 
-    public Facility updateFacility(String name,int slotduration,LocalTime start,LocalTime end){
+//    public Facility updateFacility(String name,int slotduration,LocalTime start,LocalTime end){
+//
+//        Facility updatedfacility = new Facility();
+//
+//        facilityRepository.save(updatedfacility);
+//
+//        return facilityRepository.findByName(name);
+//    }
 
-        Facility updatedfacility = new Facility();
-
-        facilityRepository.save(updatedfacility);
-
-        return facilityRepository.findByName(name);
-    }
     public List<Timeslot> generateTimeslot (String facilityName,LocalDate date){
         List<Timeslot> generatedTimeslot = new ArrayList<>();
 
