@@ -4,9 +4,7 @@ package com.booking.facility.Model;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,6 +29,7 @@ public class Timeslot {
 
     @ManyToOne
     @JoinColumn(name = "facility_id", nullable = false)
-    @JsonBackReference
+    @JsonManagedReference
     private Facility facility;
+
 }

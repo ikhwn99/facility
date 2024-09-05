@@ -15,4 +15,7 @@ public interface TimeslotRepository extends JpaRepository<Timeslot, Long> {
     @Query("SELECT t FROM Timeslot t JOIN t.facility f WHERE f.name = :facilityName AND t.date = :date")
     List<Timeslot> findByFacilityNameAndDate(@Param("facilityName") String facilityName, @Param("date") LocalDate date);
 
+    List<Timeslot> findByUsername(String username);
+
+    List<Timeslot> findByFacilityName(String facilityname);
 }

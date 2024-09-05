@@ -2,9 +2,9 @@ package com.booking.facility.Service;
 
 import com.booking.facility.Model.Facility;
 import com.booking.facility.Model.Timeslot;
+import com.booking.facility.Model.TimeslotDTO;
 import com.booking.facility.Repository.FacilityRepository;
 import com.booking.facility.Repository.TimeslotRepository;
-import com.booking.facility.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -21,9 +21,6 @@ public class BookingService {
 
     @Autowired
     private FacilityRepository facilityRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private TimeslotRepository timeslotRepository;
@@ -46,15 +43,6 @@ public class BookingService {
         }
         return newfacility;
     }
-
-//    public Facility updateFacility(String name,int slotduration,LocalTime start,LocalTime end){
-//
-//        Facility updatedfacility = new Facility();
-//
-//        facilityRepository.save(updatedfacility);
-//
-//        return facilityRepository.findByName(name);
-//    }
 
     public List<Timeslot> generateTimeslot (String facilityName,LocalDate date){
         List<Timeslot> generatedTimeslot = new ArrayList<>();
@@ -105,25 +93,13 @@ public class BookingService {
 
     
     public List<Timeslot> getTimeslot(String facilityName,LocalDate date) {
-//
-//                Facility facilitydetail = facilityRepository.findByFacilityNameandDate(facilityName, date);
-//
-//                if(facilitydetail!=null) {
-//                    Long facilityid = facilitydetail.getId();
-//                    LocalTime start = facilitydetail.getStarttime();
-//                    LocalTime end = facilitydetail.getEndtime();
-//                    int duration = facilitydetail.getSlotduration();
-//
-//                }else{
-//                    System.out.println("facility not available");
-//                    return null;
-//                }
+
             return timeslotRepository.findByFacilityNameAndDate(facilityName,date);
 
     }
 
 
-    public Timeslot bookTimeslot(Long slotid,Long username){
+    public Timeslot bookTimeslot(Long slotid,String username){
         Timeslot check = timeslotRepository.findTimeslotById(slotid);
 
         if(check.isBooked()){
@@ -131,22 +107,48 @@ public class BookingService {
             return check;
         }else{
             check.setBooked(true);
+            check.setUsername(username);
+            check = timeslotRepository.save(check);
+            return check;
         }
-
-        return check;
     }
 
-    public Timeslot unbookTimeslot(Long slotid,Long username){
+    public Timeslot unbookTimeslot(Long slotid,String username){
         Timeslot check = timeslotRepository.findTimeslotById(slotid);
 
         if(check.isBooked()){
             check.setBooked(false);
+            check.setUsername("");
+            check = timeslotRepository.save(check);
             return check;
         }else{
             System.out.println("Not yet booked");
+            return check;
         }
-        return check;
+
     }
 
 
+    public List<Timeslot> showUserTimeslots(String username) {
+        List<Timeslot> usertimeslot = timeslotRepository.findByUsername(username);
+
+        return usertimeslot;
+    }
+
+    public List<Timeslot> getAllTimeslotbyName(String facilityname) {
+        return timeslotRepository.findByFacilityName(facilityname);
+    }
+
+    public List<?> toTimeslotDTO(List<Timeslot> timeslots) {
+        List<TimeslotDTO> timeslotdata = new ArrayList<>();
+        for (Timeslot var : timeslots)
+        {
+            TimeslotDTO temp = new TimeslotDTO(var.getId(),var.getStartime(),var.getEndtime(),
+                    var.getDate(),var.getDuration(),var.isBooked(), var.getUsername(), var.getFacility().getName());
+            timeslotdata.add(temp);
+
+        }
+
+        return timeslotdata;
+    }
 }
