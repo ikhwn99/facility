@@ -5,7 +5,7 @@ FROM maven AS build
 WORKDIR /app
 
 # Copy the pom.xml and install dependencies
-COPY facility/pom.xml .
+COPY pom.xml .
 
 # Download dependencies (This will be cached unless pom.xml changes)
 RUN mvn dependency:go-offline
