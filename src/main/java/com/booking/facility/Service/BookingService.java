@@ -59,7 +59,7 @@ public class BookingService {
             while (totaltime > 0 && totaltime >= duration) {
                 if (starttime.isBefore(endtime)) {
                     Timeslot temp = new Timeslot();
-                    temp.setStartime(starttime);
+                    temp.setStarttime(starttime);
                     temp.setEndtime(starttime.plusMinutes(duration));
                     temp.setDate(date);
                     temp.setDuration(duration);
@@ -72,7 +72,7 @@ public class BookingService {
                     try {
                         timeslotRepository.save(temp);
                     } catch (DataAccessException dae) {
-                        System.out.println("Error saving timeslot for facility name:"+ temp.getFacility().getName()+" and startime: "+temp.getStartime()+" and date:"+temp.getDate());
+                        System.out.println("Error saving timeslot for facility name:"+ temp.getFacility().getName()+" and startime: "+temp.getStarttime()+" and date:"+temp.getDate());
                     }
                     starttime = starttime.plusMinutes(duration);
                     totaltime -= duration;
@@ -143,7 +143,7 @@ public class BookingService {
         List<TimeslotDTO> timeslotdata = new ArrayList<>();
         for (Timeslot var : timeslots)
         {
-            TimeslotDTO temp = new TimeslotDTO(var.getId(),var.getStartime(),var.getEndtime(),
+            TimeslotDTO temp = new TimeslotDTO(var.getId(),var.getStarttime(),var.getEndtime(),
                     var.getDate(),var.getDuration(),var.isBooked(), var.getUsername(), var.getFacility().getName());
             timeslotdata.add(temp);
 

@@ -20,7 +20,7 @@ public class Timeslot {
     @Column(unique = true)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalTime startime;
+    private LocalTime starttime;
     private LocalTime endtime;
     private LocalDate date;
     private int duration;

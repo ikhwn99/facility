@@ -11,7 +11,7 @@ COPY facility/pom.xml .
 RUN mvn dependency:go-offline
 
 # Copy the source code
-COPY facility/src ./src
+COPY ./src ./src
 
 # Package the application
 RUN mvn clean package -DskipTests
