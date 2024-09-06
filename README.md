@@ -47,5 +47,30 @@ username (not required)
 
 
 
+SQL QUERY
 
+CREATE SCHEMA `facilitybooking`;
+CREATE TABLE `facilitybooking.facility` (
+`id` bigint NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+`description` varchar(255) DEFAULT NULL,
+`slotduration` int NOT NULL,
+`starttime` time DEFAULT NULL,
+`endtime` time DEFAULT NULL,
+PRIMARY KEY (`id`),
+UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE `facilitybooking.timeslot` (
+`id` bigint NOT NULL AUTO_INCREMENT,
+`starttime` time DEFAULT NULL,
+`endtime` time DEFAULT NULL,
+`date` date DEFAULT NULL,
+`duration` int DEFAULT NULL,
+`booked` tinyint(1) DEFAULT NULL,
+`username` varchar(255) DEFAULT NULL,
+`facility_id` bigint NOT NULL,
+PRIMARY KEY (`id`),
+KEY `fk_facility` (`facility_id`),
+CONSTRAINT `fk_facility` FOREIGN KEY (`facility_id`) REFERENCES `facility` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=109 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
