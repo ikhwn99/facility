@@ -188,18 +188,4 @@ public class BookingController {
 
         return ResponseEntity.ok(usertimeslots);
     }
-
-    @GetMapping("/help")
-    public ResponseEntity<String> getHelp() {
-        try {
-            // Read the README.md file from the classpath
-            ClassPathResource readmeResource = new ClassPathResource("README.md");
-            String readmeContent = StreamUtils.copyToString(readmeResource.getInputStream(), StandardCharsets.UTF_8);
-
-            return ResponseEntity.ok(readmeContent);
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("Error reading help content");
-        }
-    }
-
 }
