@@ -18,4 +18,5 @@ public interface TimeslotRepository extends JpaRepository<Timeslot, Long> {
     List<Timeslot> findByUsername(String username);
 
     List<Timeslot> findByFacilityName(String facilityname);
+
 }

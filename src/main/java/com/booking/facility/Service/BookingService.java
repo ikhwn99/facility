@@ -151,4 +151,16 @@ public class BookingService {
 
         return timeslotdata;
     }
+
+    public boolean checkIsbooked(Long id) {
+        return timeslotRepository.findTimeslotById(id) != null && timeslotRepository.findTimeslotById(id).isBooked();
+    }
+
+    public boolean checkIsNotbooked(Long id) {
+        return timeslotRepository.findTimeslotById(id) != null && !timeslotRepository.findTimeslotById(id).isBooked();
+    }
+
+    public Timeslot getTimeslotbyId(Long id) {
+        return timeslotRepository.findTimeslotById(id);
+    }
 }

@@ -16,8 +16,7 @@ public class FacilityService {
 
 
     public Facility getFacility(String name){
-        LocalDate today = LocalDate.now();
-        return facilityRepository.findByNameTodayOnward(name,today);
+        return facilityRepository.findByName(name);
     }
 
     public List<Facility> getAllFacility() {

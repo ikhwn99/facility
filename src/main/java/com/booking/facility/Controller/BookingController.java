@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,21 +32,32 @@ public class BookingController {
     @GetMapping("/timeslots")
     public ResponseEntity<?> getTimeslots(@RequestParam String facilityname,@RequestParam (required = false) LocalDate date) {
 
-        List<Timeslot> timeslots;
+        StringBuilder errormessage = new StringBuilder("Error message\n");
+        boolean error = false;
 
-        if(date==null) {
-            timeslots = bookingService.getAllTimeslotbyName(facilityname);
-            if(timeslots==null)
-                return ResponseEntity.notFound().build();
-        }else {
-            timeslots = bookingService.getTimeslot(facilityname, date);
-            boolean checkdatepast = date.isBefore(LocalDate.now());
-            if (timeslots == null && checkdatepast) {
-                System.out.println("facility not available or past");
-                return null;
-            }
+
+        List<Timeslot> timeslots = new ArrayList<>();
+        if (facilityService.getFacility(facilityname) == null){
+            errormessage.append("Facility not available\n");
+            error = true;
         }
-        return ResponseEntity.ok(bookingService.toTimeslotDTO(timeslots));
+        if(date!=null && date.isBefore(LocalDate.now())){
+            errormessage.append("Cannot show past timeslot\n");
+            error = true;
+        }
+
+        if(!error && date==null) {
+            timeslots = bookingService.getAllTimeslotbyName(facilityname);
+        }
+        if(!error && date!=null){
+            timeslots = bookingService.getTimeslot(facilityname, date);
+        }
+
+        if(!error){
+            return ResponseEntity.ok(bookingService.toTimeslotDTO(timeslots));
+        }else{
+            return ResponseEntity.status(404).body(errormessage);
+        }
 
 
     }
@@ -56,56 +68,86 @@ public class BookingController {
         try {
             if(facilityname==null)
                 return ResponseEntity.ok(facilityService.getAllFacility());
-            else
-                return ResponseEntity.ok(facilityService.getFacility(facilityname));
+            else {
+                Facility facility=  facilityService.getFacility(facilityname);
+                if(facility==null)
+                    return ResponseEntity.status(404).body("facility not available");
+                else
+                    return ResponseEntity.ok(facility);
+            }
 
         }catch(Exception e){
             System.out.println("facility not available");
-            return null;
+            return ResponseEntity.status(404).body("facility not available");
         }
     }
 
-    @PostMapping("/admin/facility")
+    @GetMapping("/admin/facility")
     public ResponseEntity<?> generateFacility(  @RequestParam String name,
                                                 @RequestParam Optional<String> description,
                                                 @RequestParam int slotduration,
                                                 @RequestParam LocalTime start,
                                                 @RequestParam LocalTime end){
 
+        System.out.println("start:"+start);
+        System.out.println("Min starttime:"+MIN_STARTTIME);
+        System.out.println(start.isBefore(MIN_STARTTIME) || end.isAfter(MAX_ENDTIME));
         String desc = description.orElse("");
         Facility check = facilityService.getFacility(name);
+        System.out.println(check);
+        StringBuilder errormessage = new StringBuilder("Error Message\n");
+        boolean error = false;
         if (check != null) {
-            System.out.println("facility name already taken");
-            return null;
-        } else if (slotduration > MAX_TIMESLOT_DURATION || slotduration< MIN_TIMESLOT_DURATION) {
-            System.out.println("slot duration shorter than " + MIN_TIMESLOT_DURATION +" or longer than "+ MAX_TIMESLOT_DURATION);
-            return null;
-        } else if (start.isBefore(MIN_STARTTIME) && end.isAfter(MAX_ENDTIME)) {
-            System.out.println("start time is before "+ MIN_STARTTIME + "or end time after " + MAX_ENDTIME);
-            return null;
-        } else {
+            errormessage.append("facility name already taken\n");
+            error = true;
+        }
+        if (slotduration > MAX_TIMESLOT_DURATION || slotduration < MIN_TIMESLOT_DURATION) {
+            errormessage.append("slot duration shorter than " + MIN_TIMESLOT_DURATION +" or longer than "+ MAX_TIMESLOT_DURATION+"\n");
+            error = true;
+        }
+        if (start.isBefore(MIN_STARTTIME) || end.isAfter(MAX_ENDTIME)) {
+            errormessage.append("start time is before "+ MIN_STARTTIME + " or end time after " + MAX_ENDTIME+"\n");
+            error = true;
+        }
+        if (!error){
             Facility facility = bookingService.generateFacility(name, desc, slotduration, start, end);
             return ResponseEntity.ok(facility);
+        }else{
+            return ResponseEntity.accepted().body(errormessage);
         }
 
     }
 
 
-    @PostMapping("/admin/timeslot")
+    @GetMapping("/admin/timeslot")
     public ResponseEntity<?> generateTimeslot(@RequestParam String facilityname,
                                               @RequestParam LocalDate date){
 
-        List<Timeslot> timeslots;
+        List<Timeslot> timeslots = bookingService.getTimeslot(facilityname,date);
+        Facility check = facilityService.getFacility(facilityname);
 
-        timeslots = bookingService.getTimeslot(facilityname,date);
+        StringBuilder errormessage = new StringBuilder("Error message\n");
+        boolean error = false;
 
-        if (timeslots!=null){
-            System.out.println("Already generated");
-            return ResponseEntity.status(409).body("Already generated");
-        }else {
+        System.out.println(timeslots);
+        if(check==null){
+            errormessage.append("facility not available\n");
+            error=true;
+        }
+        if (!timeslots.isEmpty()){
+            errormessage.append("timeslot already generated\n");
+            error=true;
+        }
+        if(date.isBefore(LocalDate.now())){
+            errormessage.append("cannot generate timeslot for past date\n");
+            error=true;
+        }
+        if(!error){
             System.out.println("timeslots generated");
             timeslots = bookingService.generateTimeslot(facilityname,date);
             return ResponseEntity.ok(timeslots);
+        }else{
+            return ResponseEntity.accepted().body(errormessage);
         }
     }
 
@@ -114,15 +156,22 @@ public class BookingController {
                                           @RequestParam Long timeslotid,
                                           @RequestParam Optional<String> username) {
 
-
         String name = username.orElse("guest");
         Timeslot time = null;
 
-        if(action.equalsIgnoreCase("book"))
-            time = bookingService.bookTimeslot(timeslotid,name);
+        if(action.equalsIgnoreCase("book")){
+            if(bookingService.checkIsNotbooked(timeslotid)){
+                time = bookingService.bookTimeslot(timeslotid,name);
+            }else {
+                return ResponseEntity.status(404).body("already booked");
+            }
+        }
         else if (action.equalsIgnoreCase("unbook"))
-            time = bookingService.unbookTimeslot(timeslotid,name);
-
+            if(bookingService.checkIsbooked(timeslotid)) {
+                time = bookingService.unbookTimeslot(timeslotid, name);
+            }else {
+                return ResponseEntity.status(404).body("cannot unbook timeslot thats not yet booked");
+            }
 
         return ResponseEntity.ok(time);
 
@@ -132,7 +181,6 @@ public class BookingController {
     public ResponseEntity<?> userPage(@RequestParam String username) {
 
         List<Timeslot> usertimeslots = bookingService.showUserTimeslots(username);
-
 
         return ResponseEntity.ok(usertimeslots);
     }

@@ -11,13 +11,5 @@ import java.util.List;
 
 public interface FacilityRepository extends JpaRepository<Facility,Long> {
 
-//    @Query("SELECT f FROM Facility f JOIN f.slot t WHERE f.name = :facilityName AND t.date = :date")
-//    Facility findByFacilityNameAndDate(@Param("facilityName") String facilityName, @Param("date") LocalDate date);
-
-
-    @Query("SELECT f FROM Facility f JOIN f.slot t WHERE f.name = :facilityName AND t.date >= :today")
-    Facility findByNameTodayOnward(@Param("facilityName") String facilityName, @Param("today") LocalDate today);
-
-
     Facility findByName(String name);
 }
