@@ -5,9 +5,13 @@ import com.booking.facility.Model.Timeslot;
 import com.booking.facility.Service.BookingService;
 import com.booking.facility.Service.FacilityService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -184,4 +188,18 @@ public class BookingController {
 
         return ResponseEntity.ok(usertimeslots);
     }
+
+    @GetMapping("/help")
+    public ResponseEntity<String> getHelp() {
+        try {
+            // Read the README.md file from the classpath
+            ClassPathResource readmeResource = new ClassPathResource("README.md");
+            String readmeContent = StreamUtils.copyToString(readmeResource.getInputStream(), StandardCharsets.UTF_8);
+
+            return ResponseEntity.ok(readmeContent);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Error reading help content");
+        }
+    }
+
 }
